@@ -2,6 +2,7 @@ package com.bce.demo.controllers;
 
 import java.util.List;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bce.demo.dto.UserDto;
 import com.bce.demo.entity.User;
 import com.bce.demo.services.UserService;
 
@@ -24,6 +26,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @GetMapping("")
     public List<User> getAllUser() {
@@ -36,8 +41,15 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public User getUserById(@PathVariable("userId") Integer userId) {
-        return userService.getUserById(userId);
+    public ResponseEntity<UserDto> getUserById(@PathVariable("userId") Integer userId) {
+        User user = userService.getUserById(userId);
+
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        UserDto userDto = modelMapper.map(user, UserDto.class);
+        return ResponseEntity.ok(userDto);
     }
 
     @PutMapping("/{userId}")
